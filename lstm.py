@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import datetime
 import numpy as np
 import pandas as pd
 import sklearn.model_selection as sk
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     plot_model(model, to_file='lstm.png')
 
     # compile the model
-    model.compile(optimizer='adam',loss='mse')
+    model.compile(optimizer='adam',loss='mse',metrics=['accuracy'])
 
     print("Read and process data")
 
@@ -55,6 +56,11 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = \
        sk.train_test_split(X,y,test_size=0.2,random_state=42)
 
+    # prepare tensorboard
+    log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = \
+       tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
     print("Fit the model")
 
     # fit the model
@@ -63,5 +69,6 @@ if __name__ == "__main__":
     print("Evaluate the model")
 
     # evaluate the model
-    results = model.evaluate(X_test,y_test,verbose=0)
+    results = model.evaluate(X_test,y_test,verbose=0,\
+                             callbacks=[tensorboard_callback])
     print('test loss, test acc:', results)
